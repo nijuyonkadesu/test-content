@@ -25,6 +25,7 @@
 
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join, relative, extname } from 'node:path'
+import { execSync } from 'node:child_process'
 
 const args = process.argv.slice(2)
 const getArg = (flag) => { const i = args.indexOf(flag); return i !== -1 ? args[i + 1] : undefined }
@@ -159,6 +160,86 @@ if (abbrPage) {
   }
 }
 
+// ── Git-derived per-page history ────────────────────────────────────────────
+// One `git log` pass for the whole corpus (~9ms for 80 pages) — never per-file,
+// which would be N process spawns. `--name-status -M` reports renames as
+// `R<similarity><TAB>old<TAB>new`; without stitching those, a renamed page's
+// edit count and creation date both reset at the rename. Log order is
+// newest-first, so a rename maps the OLDER path onto the newer one.
+//
+// Known limitation (inherent, not fixable here): git detects renames by content
+// similarity, so a rename combined with a near-total rewrite is reported as
+// delete + add and the history chain breaks there. `git log --follow` and
+// GitHub's own blame have exactly the same blind spot.
+function gitHistory(paths) {
+  const wanted = new Set(paths)
+  const alias = new Map()          // historical path → later path
+  const canonical = (p) => {
+    let q = p
+    for (let i = 0; alias.has(q) && i < 50; i++) q = alias.get(q)
+    return q
+  }
+
+  // \x1f (unit separator) as the field delimiter: it cannot occur in an author
+  // name, unlike '|'. The format string is single-quoted so the shell doesn't
+  // eat the separators.
+  let raw = ''
+  try {
+    // --relative: emit paths relative to CONTENT_DIR so they match the corpus
+    // keys. No-op when the content dir IS the repo root (the usual case).
+    raw = execSync("git log --format='C%x1f%an%x1f%aI' --name-status -M --relative", {
+      encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: CONTENT_DIR,
+    })
+  } catch {
+    return null                     // not a git checkout (or git absent) — degrade
+  }
+
+  const out = {}
+  let commit = null
+  for (const line of raw.split('\n')) {
+    if (line.startsWith('C\x1f')) {
+      const [, author, date] = line.split('\x1f')
+      commit = { author, date }
+      continue
+    }
+    if (!commit || !line.trim()) continue
+    const cols = line.split('\t')
+    const status = cols[0]
+    let path
+    if (status.startsWith('R') && cols.length >= 3) {
+      alias.set(cols[1], canonical(cols[2]))
+      // R100 is a pure move — not a content edit, so it isn't counted. R<100
+      // means the file was modified in the same commit, which is.
+      if (status === 'R100') continue
+      path = canonical(cols[2])
+    } else {
+      path = canonical(cols[1] ?? '')
+    }
+    if (!wanted.has(path)) continue
+    const e = (out[path] ??= { edits: 0, contributors: {}, lastEdited: null, created: null })
+    e.edits++
+    e.contributors[commit.author] = (e.contributors[commit.author] ?? 0) + 1
+    e.lastEdited ??= { author: commit.author, date: commit.date }  // first seen = newest
+    e.created = commit.date                                        // last seen = oldest
+  }
+
+  for (const e of Object.values(out)) {
+    e.contributors = Object.entries(e.contributors)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, edits]) => ({ name, edits }))
+  }
+  return out
+}
+
+const history = gitHistory(Object.keys(result.files))
+if (history) {
+  // lastEdited rides along in meta.json (every reader already fetches it), which
+  // removes the per-article listCommits API call the footer used to make.
+  for (const [path, h] of Object.entries(history)) {
+    if (pages[path] && h.lastEdited) pages[path].lastEdited = h.lastEdited
+  }
+}
+
 await mkdir('_search', { recursive: true })
 await writeFile(OUT_FILE, JSON.stringify(result))
 await writeFile('_search/meta.json', JSON.stringify({
@@ -166,4 +247,17 @@ await writeFile('_search/meta.json', JSON.stringify({
   pages,
   abbr: { page: Object.keys(abbrDefs).length ? abbrPage : null, defs: abbrDefs },
 }))
-console.log(`Search index written to ${OUT_FILE} (${files.length} files); catalog meta written to _search/meta.json`)
+
+// Heavier per-page history lives apart — only the /insights page fetches it.
+if (history) {
+  await writeFile('_search/history.json', JSON.stringify({
+    version: 1,
+    generated: new Date().toISOString(),
+    pages: history,
+  }))
+}
+
+console.log(
+  `Search index → ${OUT_FILE} (${files.length} files); catalog meta → _search/meta.json` +
+  (history ? `; page history → _search/history.json (${Object.keys(history).length} pages)` : '; no git history available'),
+)
