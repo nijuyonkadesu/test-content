@@ -1,0 +1,39 @@
+name: Build search index & stats
+
+# Regenerates _search/index.json (bulk search index — the wiki fetches this one
+# file instead of every page individually) and _config/stats.json (edit/article/
+# image counts, needs git history) whenever content changes. The commit message
+# carries [skip ci] so the artifact commit doesn't retrigger this workflow.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '_search/**'
+      - '_config/stats.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # stats counts commits — needs full history
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: node scripts/build-search-index.mjs
+      - run: node scripts/build-stats.mjs
+
+      - name: Commit artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _search/index.json _config/stats.json
+          git diff --cached --quiet || { git commit -m "chore: rebuild search index & stats [skip ci]" && git push; }
