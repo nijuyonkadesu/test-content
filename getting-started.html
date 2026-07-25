@@ -1,0 +1,81 @@
+<!--fwiki:{"v":"3","title":"Getting Started","generated":"2026-07-25T21:46:59.079Z"}-->
+<h1 id="user-content-getting-started">Getting Started<a class="heading-anchor" href="#user-content-getting-started" data-anchor="user-content-getting-started" aria-label="Copy link to this section">#</a></h1>
+<p>Welcome! This page covers how to write for this wiki. See also <a class="wikilink" data-wiki-target="index" href="#">the main page</a>,
+and the <strong>Syntax guide</strong> (book icon in the toolbar, or <code>Alt+G</code>) for a copyable
+reference of everything below.</p>
+<h2 id="user-content-writing-basics">Writing basics<a class="heading-anchor" href="#user-content-writing-basics" data-anchor="user-content-writing-basics" aria-label="Copy link to this section">#</a></h2>
+<p>Open any page from the sidebar. The editor supports standard markdown plus wiki extras:</p>
+<ul>
+<li><strong>Bold</strong>, <em>italic</em>, <del>strikethrough</del>, <mark class="wiki-highlight">highlights</mark>, and inline <span class="wiki-tag" data-category="wiki">#wiki</span> tags</li>
+<li><code>inline code</code> and code blocks</li>
+<li>Tables, blockquotes, links, footnotes<sup><a href="#user-content-fn-1" id="user-content-user-content-fnref-1" data-footnote-ref aria-describedby="user-content-footnote-label">1</a></sup></li>
+<li>Images — paste one straight into the editor and it uploads itself</li>
+<li>Wikilinks: <code>[[Page Name]]</code>, or <code>[[Page Name#Heading|Label]]</code> for a section —
+like <a class="wikilink" data-wiki-target="getting-started" data-wiki-anchor="writing-basics" href="#">this one</a>. A red link means the page
+doesn't exist yet.</li>
+</ul>
+<h2 id="user-content-page-metadata">Page metadata<a class="heading-anchor" href="#user-content-page-metadata" data-anchor="user-content-page-metadata" aria-label="Copy link to this section">#</a></h2>
+<p>Start a page with a frontmatter block to control how it appears in listings:</p>
+<pre><code class="language-yaml"><span class="hljs-meta">---</span>
+<span class="hljs-attr">title:</span> <span class="hljs-string">Display</span> <span class="hljs-string">Name</span>
+<span class="hljs-attr">categories:</span> [<span class="hljs-string">Characters</span>]
+<span class="hljs-attr">aliases:</span> [<span class="hljs-string">Old</span> <span class="hljs-string">Name</span>]
+<span class="hljs-attr">sortKey:</span> <span class="hljs-string">Name</span>
+<span class="hljs-meta">---
+</span></code></pre>
+<p><code>[[Category:Some Category]]</code> anywhere in the body also files the page into a
+category — it's hidden in the rendered article and shows in the Categories bar
+at the foot of the page.</p>
+<h2 id="user-content-structure-and-layout">Structure and layout<a class="heading-anchor" href="#user-content-structure-and-layout" data-anchor="user-content-structure-and-layout" aria-label="Copy link to this section">#</a></h2>
+<ul>
+<li><code>:::infobox{title="…" image="…"}</code> — the right-rail card you see on <a class="wikilink" data-wiki-target="okabe" href="#">character pages</a></li>
+<li><code>::::columns{ratio="65-35"}</code> with <code>:::column</code> fences — multi-column pages (<a class="wikilink" data-wiki-target="layout-demo" href="#">demo</a>)</li>
+<li><code>::section[Title]{icon="📘"}</code> — decorated section bands for portals</li>
+<li><code>::category-index{of="Characters"}</code> — automatic A–Z listings (<a class="wikilink" data-wiki-target="appendix" href="#">demo</a>)</li>
+<li><code>{{Template|param=value}}</code> — reusable content from <code>_templates/</code> (<a class="wikilink" data-wiki-target="templates-demo" href="#">demo</a>)</li>
+</ul>
+<p>If you misspell a directive, the preview shows a warning box where it would
+have rendered — nothing fails silently.</p>
+<h2 id="user-content-publishing-workflow">Publishing workflow<a class="heading-anchor" href="#user-content-publishing-workflow" data-anchor="user-content-publishing-workflow" aria-label="Copy link to this section">#</a></h2>
+<div class="wiki-table-wrap"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Ctrl+S</code> / Save</td>
+<td>Commits to your personal draft branch</td>
+</tr>
+<tr>
+<td>Publish</td>
+<td>Opens a pull request: draft → main</td>
+</tr>
+<tr>
+<td>Merge PR</td>
+<td>Publishes the change to the live wiki</td>
+</tr>
+</tbody>
+</table></div>
+<p>Saving never touches the live branch directly — every change goes through a
+draft, so nothing breaks the wiki mid-edit.</p>
+<h2 id="user-content-local-dev-mode">Local dev mode<a class="heading-anchor" href="#user-content-local-dev-mode" data-anchor="user-content-local-dev-mode" aria-label="Copy link to this section">#</a></h2>
+<p>Running with <code>VITE_DEV_MODE=local</code> serves this <code>dev-content/</code> folder from disk
+with no GitHub auth; branches and PRs are simulated in memory.</p>
+<pre><code class="language-bash">pnpm install
+VITE_DEV_MODE=<span class="hljs-built_in">local</span> pnpm dev
+</code></pre>
+<h2 id="user-content-theming">Theming<a class="heading-anchor" href="#user-content-theming" data-anchor="user-content-theming" aria-label="Copy link to this section">#</a></h2>
+<p>Open the <strong>Theme</strong> panel in the toolbar to switch presets (Archive, Fandom
+Gold, Midnight Blue, Light, Slate Dark), adjust colors, fonts, and content
+width, or set a background image. Themes live in <code>_config/theme.json</code>, so they
+publish like any other edit.</p>
+<section data-footnotes class="footnotes"><h2 class="sr-only" id="user-content-footnote-label">Footnotes<a class="heading-anchor" href="#user-content-footnote-label" data-anchor="user-content-footnote-label" aria-label="Copy link to this section">#</a></h2>
+<ol>
+<li id="user-content-user-content-fn-1">
+<p>Like this footnote. <a href="#user-content-fnref-1" data-footnote-backref="" aria-label="Back to reference 1" class="data-footnote-backref">↩</a></p>
+</li>
+</ol>
+</section>

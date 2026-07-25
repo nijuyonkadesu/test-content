@@ -1,0 +1,114 @@
+<!--fwiki:{"v":"3","title":"Layout Demo","generated":"2026-07-25T21:46:59.105Z"}-->
+<h1 id="user-content-layout-demo">Layout Demo<a class="heading-anchor" href="#user-content-layout-demo" data-anchor="user-content-layout-demo" aria-label="Copy link to this section">#</a></h1>
+<div class="wiki-section"><span class="wiki-section-icon">📘</span><span class="wiki-section-title">Columns</span></div>
+<div class="directive directive-columns" data-directive="columns" data-ratio="65-35" style="grid-template-columns: 65fr 35fr"><div class="directive directive-column" data-directive="column"><p>This is the <strong>wide</strong> left column at 65%. It holds the main prose content of the
+page, flowing naturally across multiple lines so you can see the column width.</p><p>It can contain anything — lists, links like <a class="wikilink" data-wiki-target="index" href="#">index</a>, and more.</p></div><div class="directive directive-column" data-directive="column"><p>This is the narrow 35% right column — good for an infobox or sidebar notes.</p></div></div>
+<div class="directive directive-columns" data-directive="columns" data-ratio="1-1-1" style="grid-template-columns: 1fr 1fr 1fr"><div class="directive directive-column" data-directive="column"><p>Column A</p></div><div class="directive directive-column" data-directive="column"><p>Column B</p></div><div class="directive directive-column" data-directive="column" data-span="all"><p>This cell spans <strong>all</strong> columns — useful for a full-width image or table row.</p></div></div>
+<div class="wiki-section"><span class="wiki-section-icon">🖼️</span><span class="wiki-section-title">Media</span></div>
+<p>A standalone image with a quoted title becomes a captioned figure:</p>
+<figure class="wiki-figure"><img src="https://picsum.photos/seed/akiba/720/300" alt="Akihabara" title="Akihabara — where it all happens."><figcaption>Akihabara — where it all happens.</figcaption></figure>
+<div class="directive directive-figure" data-directive="figure" data-align="right" style="max-width: 260px"><figure class="wiki-figure"><img src="https://picsum.photos/seed/meter/260/160" alt="Divergence meter" title="A floated, captioned figure."><figcaption>A floated, captioned figure.</figcaption></figure></div>
+<p>Text flows around a <code>:::figure{align="right"}</code> block, the way an article wraps
+its media. On phones the float collapses to full width. Use <code>align="left"</code> or
+<code>align="center"</code> the same way — and <code>width</code> caps the figure's size.</p>
+<p>A <code>:::gallery</code> is a swipeable strip — scroll it horizontally:</p>
+<div class="directive directive-gallery" data-directive="gallery"><p><img src="https://picsum.photos/seed/g1/320/220" alt="One">
+<img src="https://picsum.photos/seed/g2/280/220" alt="Two">
+<img src="https://picsum.photos/seed/g3/340/220" alt="Three">
+<img src="https://picsum.photos/seed/g4/300/220" alt="Four">
+<img src="https://picsum.photos/seed/g5/310/220" alt="Five"></p></div>
+<div class="wiki-section"><span class="wiki-section-icon">✒️</span><span class="wiki-section-title">Quotes &<span class="wiki-tag" data-category="x26">#x26</span>; alignment</span></div>
+<blockquote>
+<p>The universe has a beginning, but no end. — Okabe quoting Stein</p>
+<p>Quotes carry a decorative mark, themeable via the blockquote tokens.</p>
+</blockquote>
+<div class="directive directive-center" data-directive="center"><p>This block is centered — <code>:::center</code> (also <code>:::right</code> and <code>:::justify</code>).</p></div>
+<div class="wiki-section"><span class="wiki-section-icon">📊</span><span class="wiki-section-title">Tables</span></div>
+<p>Wide tables scroll horizontally on small screens instead of breaking the layout:</p>
+<div class="wiki-table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Worldline</th>
+<th>Divergence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Alpha</td>
+<td>0.337187</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Alpha</td>
+<td>0.409431</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Alpha</td>
+<td>0.456903</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Alpha</td>
+<td>0.523299</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Alpha</td>
+<td>0.523307</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Alpha</td>
+<td>0.571015</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Alpha</td>
+<td>0.571024</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Beta</td>
+<td>1.049809</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Beta</td>
+<td>1.064750</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Beta</td>
+<td>1.129848</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Beta</td>
+<td>1.130205</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Beta</td>
+<td>1.130212</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Steins Gate</td>
+<td>1.048596</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Omega</td>
+<td>3.406288</td>
+</tr>
+</tbody>
+</table></div>
+<div class="wiki-section"><span class="wiki-section-icon">✨</span><span class="wiki-section-title">Extras</span></div>
+<div class="directive directive-note" data-directive="note"><p>Callouts: <code>:::note</code>, <code>:::tip</code>, <code>:::warning</code>, <code>:::danger</code> — and math renders
+too: $E = mc^2$, worldline divergence $d = 1.048596$.</p></div>
+<div class="directive directive-collapse" data-directive="collapse" data-title="Spoilers (click to expand)"><p>Okabe reaches the Steins Gate worldline. Sorry.</p></div>
+<div class="directive directive-tabs" data-directive="tabs"><div class="directive directive-tab" data-directive="tab" data-label="Alpha"><p>The worldline where <a class="wikilink wiki-abbr" data-wiki-target="pages/abbreviations.md" data-wiki-anchor="abbr-sern" href="#" title="The organization secretly researching time travel">SERN</a> wins.</p></div><div class="directive directive-tab" data-directive="tab" data-label="Beta"><p>The worldline where the war happens instead.</p></div></div>
+<div class="wiki-navbox"><span class="wiki-navbox-title">Characters</span><span class="wiki-navbox-links"><a class="wikilink" data-wiki-target="pages/characters/daru.md" href="#">Itaru Hashida</a><span class="navbox-sep">·</span><a class="wikilink" data-wiki-target="pages/characters/kurisu.md" href="#">Kurisu Makise</a><span class="navbox-sep">·</span><a class="wikilink" data-wiki-target="pages/characters/mayuri.md" href="#">Mayuri Shiina</a><span class="navbox-sep">·</span><a class="wikilink" data-wiki-target="pages/characters/okabe.md" href="#">Rintaro Okabe</a></span></div>
