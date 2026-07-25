@@ -56,6 +56,27 @@ async function walk(dir) {
   return out
 }
 
+// Templates, resolved from disk. The app resolves them from the live editor
+// buffer / search cache / backend instead — but both call the SAME expansion
+// engine (renderer.expandTemplatesWith), so nesting, parameter defaults, loop
+// detection and code-block protection cannot diverge between the two.
+const TEMPLATE_DIR = renderer.TEMPLATE_DIR ?? '_templates'
+const templateCache = new Map()
+
+async function loadTemplateFromDisk(name) {
+  const key = name.toLowerCase()
+  if (templateCache.has(key)) return templateCache.get(key)
+  // Case-insensitive, matching the app's own lookup.
+  let body = null
+  try {
+    const entries = await readdir(join(CONTENT_DIR, TEMPLATE_DIR), { withFileTypes: true })
+    const hit = entries.find((e) => e.isFile() && e.name.toLowerCase() === `${key}.md`)
+    if (hit) body = await readFile(join(CONTENT_DIR, TEMPLATE_DIR, hit.name), 'utf8')
+  } catch { /* no _templates dir — every reference is simply missing */ }
+  templateCache.set(key, body)
+  return body
+}
+
 const files = await walk(CONTENT_DIR)
 let written = 0
 let failed = 0
@@ -66,7 +87,10 @@ for (const file of files) {
   const slug = rel.slice('pages/'.length, -'.md'.length)
   try {
     const raw = await readFile(file, 'utf8')
-    const { data, body } = renderer.parseFrontmatter(raw)
+    const expanded = renderer.expandTemplatesWith
+      ? await renderer.expandTemplatesWith(raw, loadTemplateFromDisk)
+      : raw
+    const { data, body } = renderer.parseFrontmatter(expanded)
     const html = await renderer.renderMarkdown(body)
     const outFile = join(OUT_DIR, `${slug}.html`)
     await mkdir(dirname(outFile), { recursive: true })

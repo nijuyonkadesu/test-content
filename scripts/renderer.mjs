@@ -40577,11 +40577,108 @@ async function renderMarkdown(raw2, ctx = {}) {
   return html7;
 }
 
+// src/systems/template-expand.ts
+var MAX_DEPTH = 12;
+var TEMPLATE_DIR = "_templates";
+function parseArgs(argStr) {
+  const args = {};
+  if (!argStr) return args;
+  let pos = 1;
+  for (const part of argStr.split("|").slice(1)) {
+    const eq = part.indexOf("=");
+    if (eq > -1) args[part.slice(0, eq).trim()] = part.slice(eq + 1).trim();
+    else if (part.trim()) args[String(pos++)] = part.trim();
+  }
+  return args;
+}
+function parseDirectiveAttrs(attrs) {
+  const out = {};
+  const re2 = /(\w+)=(?:"([^"]*)"|'([^']*)'|(\S+))/g;
+  let m;
+  while (m = re2.exec(attrs)) out[m[1]] = m[2] ?? m[3] ?? m[4] ?? "";
+  return out;
+}
+function normalizeTemplateDirectives(text8) {
+  return text8.replace(/^::template\{([^}\n]*)\}[ \t]*$/gm, (_, attrs) => {
+    const a = parseDirectiveAttrs(attrs);
+    const name = a.name ?? a["1"] ?? "";
+    if (!name) return "";
+    const rest = Object.entries(a).filter(([k]) => k !== "name").map(([k, v]) => `|${k}=${v}`).join("");
+    return `{{${name}${rest}}}`;
+  });
+}
+function substituteParams(body3, args) {
+  return body3.replace(
+    /\{\{\{\s*([^|{}]+?)\s*(?:\|([^{}]*?))?\}\}\}/g,
+    (_, key2, def) => args[key2.trim()] ?? def ?? ""
+  );
+}
+function protectCode(text8) {
+  const blocks = [];
+  const stash = (m) => {
+    blocks.push(m);
+    return ` C${blocks.length - 1} `;
+  };
+  let out = text8.replace(/```[\s\S]*?```/g, stash);
+  out = out.replace(/`[^`\n]*`/g, stash);
+  return { text: out, blocks };
+}
+function restoreCode(text8, blocks) {
+  return text8.replace(/ C(\d+) /g, (_, i) => blocks[Number(i)] ?? "");
+}
+var MAGIC_RE = /__(NOTOC|NOEDITSECTION|NOTITLE)__/g;
+function magicFlags(raw2) {
+  return {
+    noToc: /__NOTOC__/.test(raw2),
+    noEditSection: /__NOEDITSECTION__/.test(raw2),
+    noTitle: /__NOTITLE__/.test(raw2)
+  };
+}
+function stripMagicWords(text8) {
+  return text8.replace(MAGIC_RE, "");
+}
+async function expand(text8, load, stack, depth) {
+  if (depth > MAX_DEPTH) return text8;
+  const { text: safe, blocks } = protectCode(text8);
+  const re2 = /\{\{(?!\{)\s*([^|{}\n]+?)\s*((?:\|[^{}]*)?)\}\}(?!\})/g;
+  let result = "";
+  let lastIndex = 0;
+  let m;
+  while (m = re2.exec(safe)) {
+    result += safe.slice(lastIndex, m.index);
+    lastIndex = m.index + m[0].length;
+    const name = m[1].trim();
+    const args = parseArgs(m[2]);
+    if (stack.includes(name.toLowerCase())) {
+      result += `*(template loop: ${name})*`;
+      continue;
+    }
+    const tplRaw = await load(name);
+    if (tplRaw == null) {
+      result += `*(missing template: ${name})*`;
+      continue;
+    }
+    const tplBody = substituteParams(parseFrontmatter(tplRaw).body.trim(), args);
+    result += await expand(tplBody, load, [...stack, name.toLowerCase()], depth + 1);
+  }
+  result += safe.slice(lastIndex);
+  return restoreCode(result, blocks);
+}
+async function expandTemplatesWith(raw2, load) {
+  if (!/\{\{|::template\{|__[A-Z]+__/.test(raw2)) return raw2;
+  const normalized = normalizeTemplateDirectives(raw2);
+  const expanded = await expand(normalized, load, [], 0);
+  return stripMagicWords(expanded);
+}
+
 // prerender-entry.ts
-var RENDERER_VERSION = "1";
+var RENDERER_VERSION = "2";
 export {
   RENDERER_VERSION,
+  TEMPLATE_DIR,
   escHtml,
+  expandTemplatesWith,
+  magicFlags,
   parseFrontmatter,
   renderMarkdown,
   slugify
