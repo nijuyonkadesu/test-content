@@ -112,6 +112,7 @@ function plainExcerpt(body, max = 200) {
     .replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/^#{1,6}\s+[^\n]*$/gm, '')
+    .replace(/^\|[^\n]*$/gm, '')
     .replace(/[*_~`>#]|^\s*-\s+/gm, '')
     .replace(/\s+/g, ' ')
     .trim()
