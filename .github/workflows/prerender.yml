@@ -1,0 +1,51 @@
+name: Prerender pages
+
+# Renders every page to an HTML fragment and publishes them to the `prerender`
+# branch, which the wiki's edge Function injects into the app shell so non-JS
+# crawlers (GPTBot, ClaudeBot, PerplexityBot — none execute JavaScript) and
+# social scrapers see the real article text.
+#
+# A SEPARATE BRANCH, deliberately: generated HTML never touches main's history,
+# and the branch is force-pushed as a single orphan commit so it can't grow
+# without bound.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pages/**'
+      - 'scripts/build-prerender.mjs'
+      - 'scripts/renderer.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prerender
+  cancel-in-progress: true
+
+jobs:
+  prerender:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Render fragments
+        run: node scripts/build-prerender.mjs --out "$RUNNER_TEMP/_prerender"
+
+      - name: Publish to the prerender branch
+        run: |
+          cd "$RUNNER_TEMP/_prerender"
+          git init -q -b prerender
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "prerender from ${GITHUB_SHA::7}"
+          # Orphan force-push: this branch is a build artifact, not history.
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" prerender
+          echo "published $(find . -name '*.html' | wc -l) fragments"
