@@ -1,0 +1,11 @@
+{
+  "title": {
+    "en": "Steins;Gate Wiki",
+    "ja": "シュタインズ・ゲート Wiki"
+  },
+  "tagline": "El Psy Kongroo",
+  "community": {
+    "enabled": false,
+    "editBranchPrefix": "contrib/"
+  }
+}

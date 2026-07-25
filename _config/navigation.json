@@ -1,0 +1,121 @@
+{
+  "menus": [
+    {
+      "label": {
+        "en": "Explore",
+        "ja": "探索"
+      },
+      "icon": "Compass",
+      "items": [
+        {
+          "label": {
+            "en": "Main Page",
+            "ja": "メインページ"
+          },
+          "href": "index",
+          "icon": "Home"
+        },
+        {
+          "label": {
+            "en": "All Pages",
+            "ja": "全ページ"
+          },
+          "href": "appendix",
+          "icon": "List"
+        },
+        {
+          "label": {
+            "en": "Random page",
+            "ja": "おまかせ表示"
+          },
+          "href": "special:random"
+        },
+        {
+          "label": {
+            "en": "Recent changes",
+            "ja": "最近の更新"
+          },
+          "href": "special:recent-changes",
+          "icon": "History"
+        },
+        {
+          "label": {
+            "en": "Templates Demo",
+            "ja": "テンプレートデモ"
+          },
+          "href": "templates-demo",
+          "icon": "LayoutTemplate"
+        }
+      ]
+    },
+    {
+      "label": {
+        "en": "Characters",
+        "ja": "登場人物"
+      },
+      "icon": "Users",
+      "items": [
+        {
+          "label": {
+            "en": "Rintaro Okabe",
+            "ja": "岡部倫太郎"
+          },
+          "href": "okabe"
+        },
+        {
+          "label": {
+            "en": "Kurisu Makise",
+            "ja": "牧瀬紅莉栖"
+          },
+          "href": "kurisu"
+        },
+        {
+          "label": {
+            "en": "Mayuri Shiina",
+            "ja": "椎名まゆり"
+          },
+          "href": "mayuri"
+        },
+        {
+          "label": {
+            "en": "Itaru Hashida",
+            "ja": "橋田至"
+          },
+          "href": "daru"
+        },
+        {
+          "label": {
+            "en": "All Characters",
+            "ja": "登場人物一覧"
+          },
+          "href": "Characters"
+        }
+      ]
+    },
+    {
+      "label": {
+        "en": "Community",
+        "ja": "コミュニティ"
+      },
+      "icon": "MessageSquare",
+      "items": [
+        {
+          "label": {
+            "en": "Getting Started",
+            "ja": "はじめに"
+          },
+          "href": "getting-started",
+          "icon": "BookOpen"
+        },
+        {
+          "label": {
+            "en": "GitHub Repo",
+            "ja": "GitHubリポジトリ"
+          },
+          "href": "https://github.com",
+          "icon": "Github"
+        }
+      ]
+    }
+  ]
+}
