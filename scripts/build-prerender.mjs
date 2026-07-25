@@ -78,6 +78,24 @@ async function loadTemplateFromDisk(name) {
 }
 
 const files = await walk(CONTENT_DIR)
+
+// Catalog directives (::category-index, ::wanted-pages) need whole-corpus
+// knowledge, so the corpus is indexed and the catalog hydrated ONCE before any
+// page renders — exactly what the app does via ensureCatalog(), using the same
+// code. Without this, listings render empty and every wikilink counts as
+// "wanted".
+const corpus = {}
+for (const file of files) {
+  const rel = relative(CONTENT_DIR, file).replace(/\\/g, '/')
+  corpus[rel] = await readFile(file, 'utf8')
+}
+let catalogReady = false
+if (renderer.indexFile && renderer.hydrateCatalogFrom) {
+  for (const [path, raw] of Object.entries(corpus)) renderer.indexFile(path, raw)
+  renderer.hydrateCatalogFrom(corpus)
+  catalogReady = true
+}
+
 let written = 0
 let failed = 0
 
@@ -86,12 +104,17 @@ for (const file of files) {
   if (!rel.startsWith('pages/')) continue
   const slug = rel.slice('pages/'.length, -'.md'.length)
   try {
-    const raw = await readFile(file, 'utf8')
+    const raw = corpus[rel]
+    // Same four stages, same order, as the app's Preview component.
     const expanded = renderer.expandTemplatesWith
       ? await renderer.expandTemplatesWith(raw, loadTemplateFromDisk)
       : raw
     const { data, body } = renderer.parseFrontmatter(expanded)
-    const html = await renderer.renderMarkdown(body)
+    let html = await renderer.renderMarkdown(body)
+    if (catalogReady) {
+      html = await renderer.expandCatalogDirectives(html)
+      html = renderer.markAbbreviations(html, rel)
+    }
     const outFile = join(OUT_DIR, `${slug}.html`)
     await mkdir(dirname(outFile), { recursive: true })
     // The metadata comment is read by the Function, so it never parses markdown
@@ -113,4 +136,4 @@ for (const file of files) {
 
 console.log(`Prerendered ${written} page${written === 1 ? '' : 's'} → ${OUT_DIR}/`
   + (failed ? ` (${failed} failed, those fall back to client rendering)` : '')
-  + ` [renderer ${RENDERER_VERSION}]`)
+  + ` [renderer ${RENDERER_VERSION}${catalogReady ? ', catalog' : ', no catalog'}]`)
