@@ -91,11 +91,16 @@ function scanCategoryMarkers(body) {
 
 // Raw [[wikilink]] targets — Category:/prefixed links excluded, same paragraph
 // guard as the app's wantedPagesHtml.
+// Inside a markdown table cell the pipe of [[target|label]] must be escaped as
+// `\|`, so the raw text reads [[target\|label]] and a naive scan captures
+// "target\". The renderer never sees this (markdown unescapes before the
+// wikilink post-processor runs), but every raw-text scan must strip it or the
+// link vanishes from the graph and reappears as a phantom wanted page.
 function scanLinkTargets(raw) {
   const targets = []
   for (const m of raw.matchAll(/\[\[([^\]|#[]+?)(?:#[^\]|[]+?)?(?:\|[^\][]+?)?\]\]/g)) {
     if (/\n[ \t]*\n/.test(m[0])) continue
-    const t = m[1].replace(/\s+/g, ' ').trim()
+    const t = m[1].replace(/\s+/g, ' ').replace(/\\+$/, '').trim()
     if (/^category:/i.test(t) || /^\w+:/.test(t)) continue
     targets.push(t)
   }
