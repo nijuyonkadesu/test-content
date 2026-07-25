@@ -7,5 +7,6 @@
   "community": {
     "enabled": false,
     "editBranchPrefix": "contrib/"
-  }
+  },
+  "homePage": "pages/index.md"
 }
